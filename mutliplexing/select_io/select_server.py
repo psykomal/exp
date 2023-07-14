@@ -7,9 +7,14 @@ def child_process(epoll, sock, id):
     events = epoll.poll()
     for fd, event in events:
       if fd == sock.fileno():
-        conn, addr = sock.accept()
-        print(f'Connected by {addr} pid: {id}')
-        conn.close()
+        try:
+            conn, addr = sock.accept()
+            print(f'Connected by {addr} pid: {id}')
+            conn.close()
+        except BlockingIOError:
+            print("BlockingIOError")
+        except Exception as e:
+            print(e)
 
 if __name__ == '__main__':
 
