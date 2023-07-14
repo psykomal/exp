@@ -6,7 +6,6 @@ import os
 EPOLLEXCLUSIVE = 1<<28
 
 def child_process(epoll, sock, id):
-  while True:
     while True:
         try:
             epoll.poll()
@@ -30,7 +29,7 @@ if __name__ == '__main__':
 
 
     # Fork child processes
-    for i in range(4):
+    for i in range(3):
         pid = os.fork()
         if pid == 0:
             # Create epoll instance
