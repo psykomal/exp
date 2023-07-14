@@ -2,13 +2,13 @@ import socket
 import select
 import os
 
-def child_process(epoll, sock):
+def child_process(epoll, sock, id):
   while True:
     events = epoll.poll()
     for fd, event in events:
       if fd == sock.fileno():
         conn, addr = sock.accept()
-        print('Connected by', addr)
+        print(f'Connected by {addr} pid: {id}')
         conn.close()
 
 if __name__ == '__main__':
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     for i in range(4):
         pid = os.fork()
         if pid == 0:
-            child_process(epoll, sock)
+            child_process(epoll, sock, i)
 
     while True:
         pass
