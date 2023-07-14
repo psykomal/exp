@@ -11,12 +11,16 @@ def child_process(epoll, sock, id):
             epoll.poll()
         except IOError:
             continue
-        try:
-            cd, _ = sock.accept()
-        except socket.error:
-            continue
+        while True:
+            try:
+                cd, _ = sock.accept()
+                print(f"worker {id}")
+            except socket.error:
+                break
+            except Exception as e:
+                print(f"Some other exp {e}")
+                break
         cd.close()
-        print(f"worker {id}")
 
 if __name__ == '__main__':
 
