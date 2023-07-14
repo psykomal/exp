@@ -2,6 +2,9 @@ import socket
 import select
 import os
 
+# To avoid thundering-herd problem. This requires kernel 4.5+.
+EPOLLEXCLUSIVE = 1<<28
+
 def child_process(epoll, sock, id):
   while True:
     events = epoll.poll()
@@ -27,7 +30,7 @@ if __name__ == '__main__':
 
     # Create epoll instance
     epoll = select.epoll()
-    epoll.register(sock.fileno(), select.EPOLLIN)
+    epoll.register(sock.fileno(), select.EPOLLIN | EPOLLEXCLUSIVE)
 
     # Fork child processes
     for i in range(4):
