@@ -7,17 +7,17 @@ EPOLLEXCLUSIVE = 1<<28
 
 def child_process(epoll, sock, id):
   while True:
-    events = epoll.poll()
-    for fd, event in events:
-      if fd == sock.fileno():
+    while True:
         try:
-            conn, addr = sock.accept()
-            print(f'Connected by {addr} pid: {id}')
-            conn.close()
-        except BlockingIOError:
-            print("BlockingIOError")
-        except Exception as e:
-            print(e)
+            epoll.poll()
+        except IOError:
+            continue
+        try:
+            cd, _ = sock.accept()
+        except socket.error:
+            continue
+        cd.close()
+        print(f"worker {id}")
 
 if __name__ == '__main__':
 
@@ -25,18 +25,17 @@ if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(('127.0.0.1', 8080))
-    sock.listen(5)
+    sock.listen(10)
     sock.setblocking(False)
 
-    # Create epoll instance
-    epoll = select.epoll()
-    epoll.register(sock.fileno(), select.EPOLLIN | EPOLLEXCLUSIVE)
 
     # Fork child processes
     for i in range(4):
         pid = os.fork()
         if pid == 0:
+            # Create epoll instance
+            epoll = select.epoll()
+            epoll.register(sock, select.EPOLLIN | EPOLLEXCLUSIVE)
             child_process(epoll, sock, i)
 
-    while True:
-        pass
+    os.wait()
