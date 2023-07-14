@@ -42,6 +42,5 @@ if __name__ == '__main__':
         if pid == 0:
             child_process(client_sockets, master_socket, i)
             
-    while True:
-        pass
+    os.wait()
         
